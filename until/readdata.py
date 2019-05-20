@@ -64,7 +64,8 @@ def get_avg_socre(input_file):
         f.closed
 
     for itemid in record_dict:
-        score_dict[itemid] = round(record_dict[itemid][1]/record_dict[itemid][1],3)
+        score_dict[itemid] = round(record_dict[itemid][1]/record_dict[itemid][0],3)
+
     return score_dict
 
 
