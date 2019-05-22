@@ -1,8 +1,10 @@
 
 import numpy as np
 import sys
+import operator
 sys.path.append('../until')
 import until.readdata as read
+
 
 def lfm_train(train_data, F, alpha, beta, step):
     '''
@@ -13,8 +15,8 @@ def lfm_train(train_data, F, alpha, beta, step):
         beta: learning rate
         step: iteration num
     Return:
-        dick key: itemid value: list
-        dict key: userid value:list
+        dick key: itemid value: np.ndarray
+        dict key: userid value: np.ndarray
     '''
 
     user_vec = {}
@@ -61,6 +63,55 @@ def model_train_process():
     '''test model train process'''
     train_data = read.get_train_data('../data/ratings.csv')
     user_vec,item_vec = lfm_train(train_data,50,0.01,0.1,50)
+    #for userid in user_vec:
+        #recom_result = give_recom_result(user_vec,item_vec,userid)
+    recom_result = give_recom_result(user_vec, item_vec, '24')
+    ana_recom_result(train_data,'24',recom_result)
+
+
+
+def give_recom_result(user_vec, item_vec, userid):
+    '''
+    use lfm model result give ifx userid recom result
+    args:
+        user_vec: lfm model result
+        item_vec: lfm model result
+        userid: fix userid
+    return:
+        a list[(itemid,score),(itemid2,socre2)...]
+    '''
+    fix_num = 10
+    if userid not in user_vec:
+        return []
+    record = {}
+    recom_list = []
+    user_vector = user_vec[userid]
+    for itemid in item_vec:
+        item_vector = item_vec[itemid]
+        res = np.dot(user_vector, item_vector)/(np.linalg.norm(user_vector)*np.linalg.norm(item_vector))
+        record[itemid] = res
+    for zuhe in sorted(record.items(),key = operator.itemgetter(1))[-fix_num:]:
+        itemid = zuhe[0]
+        score = round(zuhe[1],3)
+        recom_list.append((itemid, score))
+    return recom_list
+
+def ana_recom_result(train_data, userid, recom_list):
+    '''
+    test recom result for userid
+    Args:
+        train_data: train data for lfm model
+        userid:fix userid
+        recom_list: recom result by lfm
+    '''
+    item_info = read.get_item_info('../data/movies.csv')
+    for data_instance in train_data:
+        tmp_userid, itemid, label = data_instance
+        if tmp_userid==userid and label == 1:
+            print (item_info[itemid])
+    print('recom result')
+    for zuhe in recom_list:
+        print(item_info[zuhe[0]])
 
 if __name__=='__main__':
     model_train_process()

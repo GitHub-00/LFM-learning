@@ -114,7 +114,7 @@ def get_train_data(input_file):
             train_data += [(userid,zuhe[0],zuhe[1]) for zuhe in pos_dict[userid]][:data_num]
         else:
             continue
-        sorted_neg_list = sorted(neg_dict[userid],key=lambda element:element[1])[:data_num]
+        sorted_neg_list = sorted(neg_dict[userid],key=lambda element:element[1])[-data_num:]
         train_data += [(userid, zuhe[0] , 0 ) for zuhe in sorted_neg_list]
 
     return train_data
